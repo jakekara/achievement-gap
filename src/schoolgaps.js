@@ -1,4 +1,7 @@
-var d3 = require("d3");
+var d3 = Object.assign({},
+		       require("d3-selection"),
+		       require("d3-request"));
+
 var gaplib = require( "./gap-lib.js" );
 
 var drawn = false;
@@ -11,6 +14,7 @@ var selected = function(sel){
 var selected_filname = null;
 var selected_keys = null;
 var cached_files = {};
+var throttle = null;
 
 var get_fname = function(){
     var ret = "data/"
@@ -35,7 +39,7 @@ var update = function(){
     if ( get_keys() == selected_keys
 	 && get_fname() == selected_fname ) return;
 
-    console.log(get_fname());
+    // console.log(get_fname());
     
     if ( cached_files.hasOwnProperty( get_fname()) )
     {
@@ -54,7 +58,7 @@ var update = function(){
 
 var go = function(d, keys){
 
-    console.log("got data", d);
+    // console.log("got data", d);
 
     var d = d.sort(function(a, b){
 	if (a["state"].toUpperCase() == "CONNECTICUT"
@@ -70,18 +74,20 @@ var go = function(d, keys){
 	.radius(8)
 	.data(d)
 
-    console.log( gaps );
-    console.log(gaps.data_arr("ell"));
-    console.log( gaps.min_max("ell"), gaps.min_max("non-ell") );
-    console.log( gaps.val_range() );
-    console.log( gaps.gap_range() );
+    // console.log( gaps );
+    // console.log(gaps.data_arr("ell"));
+    // console.log( gaps.min_max("ell"), gaps.min_max("non-ell") );
+    // console.log( gaps.val_range() );
+    // console.log( gaps.gap_range() );
 
     gaps.draw_rank();
 
     d3.select(window).on("resize", function(){
-	gaps.draw_rank.call(gaps);
+	clearTimeout(throttle);
+	throttle = setTimeout(function(){
+	    gaps.draw_rank.call(gaps);
+	}, 250);
     });
-
 
     drawn = true;
 }
@@ -134,8 +140,8 @@ var make_gui = function(){
 	.enter()
 	.append("option")
 	.attr("data-fname",function(d){ return d["fname"]; })
-	.attr("data-key1",function(d){ console.log(d); return d["key1"]; })
-	.attr("data-key2",function(d){ console.log(d); return d["key2"]; })
+	.attr("data-key1",function(d){  return d["key1"]; })
+	.attr("data-key2",function(d){  return d["key2"]; })
 	.text(function(d){ return d["label"];});
 
 
@@ -154,10 +160,7 @@ var make_gui = function(){
 	.text(function(d){ return d["label"];});
 
 
-    d3.selectAll("select").on("change",
-			      function(){
-				  update();
-			      });
+    d3.selectAll("select").on("change", update);
 
     update();
 
@@ -167,5 +170,3 @@ var make_gui = function(){
 
 make_gui();
 
-console.log("fname", get_fname());
-console.log("keys", get_keys());

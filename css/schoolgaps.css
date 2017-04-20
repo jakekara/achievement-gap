@@ -4,6 +4,9 @@ body{
     font-family: 'Lato', sans-serif;
 }
 
+#container{
+}
+
 select{
     margin-right: 3px;
 }
@@ -15,13 +18,13 @@ select{
 .rankdot circle {
     fill: lightgray;
     stroke: white;
-    stroke-width: 1.5;
+    stroke-width: 1;
     fill-opacity: 0.8;
 }
 
 .rankdot text {
-    font-family: monaco, Consolas, "Lucida Console", monospace;
-    font-size: 12px;
+    /* font-family: monaco, Consolas, "Lucida Console", monospace; */
+    font-size: 10px;
     opacity: 0;
 }
 
@@ -39,11 +42,10 @@ select{
     opacity: 1;
 }
 
-
-
 .rankdot:hover circle {
     fill: gold;
     stroke: gold;
+    fill-opacity: 1;
 }
 
 .rankdot[data-state='Connecticut'] circle{
@@ -65,4 +67,11 @@ select{
 .d3axis {
     opacity: 0.5;
 }
-    
+
+svg {
+    margin-top: 14px;
+}
+
+.detail-label {
+    font-size: 10px;
+}

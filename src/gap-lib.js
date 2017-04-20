@@ -1,4 +1,9 @@
-const d3 = require( "d3" );
+var d3 = Object.assign({},
+		       require("d3-selection"),
+		       require("d3-array"),
+		       require("d3-scale"),
+		       require("d3-axis"));
+
 const accessor = require( "./accessor.js" )["accessor"];
 
 var gapchart = function()
@@ -7,8 +12,8 @@ var gapchart = function()
     this.__dot_radius = 10;
     this.__scale_margin = 0.1;
     this.__margin = {
-	"left":10,
-	"right":10,
+	"left":0,
+	"right":0,
 	"top":0,
 	"bottom":0
     };
@@ -18,17 +23,17 @@ var gapchart = function()
 
 exports.gapchart = gapchart
 
-gapchart.prototype.radius = accessor("__dot_radius");
+gapchart.prototype.radius = accessor( "__dot_radius" );
 
-gapchart.prototype.buffer_pct = accessor("__buffer_pct");
+gapchart.prototype.buffer_pct = accessor( "__buffer_pct" );
 
-gapchart.prototype.container = accessor("__sel");
+gapchart.prototype.container = accessor( "__sel" );
 
-gapchart.prototype.val_keys = accessor("__val_key");
+gapchart.prototype.val_keys = accessor( "__val_key" );
 
-gapchart.prototype.label_key = accessor("__label_key");
+gapchart.prototype.label_key = accessor( "__label_key" );
 
-gapchart.prototype.data = accessor("__data");
+gapchart.prototype.data = accessor( "__data" );
 
 gapchart.prototype.data_arr = function ( key )
 {
@@ -97,7 +102,7 @@ gapchart.prototype.d3scale = function( range ){
     var y_max = 
 	this.__svg.node().getBoundingClientRect().width
 	- this.radius()
-	- this.__margin.left;
+	- this.__margin.right;
 
     return d3.scaleLinear()
         .domain( range || this.value_range() )
@@ -136,18 +141,21 @@ gapchart.prototype.draw_rank_dots = function()
     var lkey = this.label_key();
 
     var xmin = this.__margin.left;
-    var xmax = this.__margin.right;
+    var xmax = this.container().node().getBoundingClientRect().width
+	-  this.__margin.right;
     
     var label = this.__rank_dots
 	.append("text")
 	.text(function(d){ return d[lkey]; });
+
     label.attr("y", function(){ return this.getBBox().height;})
 	.attr("x", function(){
 
 	    var ret = 0 - this.getBBox().width / 2 ;
+
 	    return ret;
 	    
-	})
+	});
 
     this.__rank_dots
 	.append("circle")
@@ -161,29 +169,29 @@ gapchart.prototype.draw_rank = function (){
     // filter data
     var that = this;
     this.data(this.data().filter(function(a){
-	console.log(a["state"],
-		    "'" + a[that.val_keys()[0]] + "'",
-		    isNaN(a[that.val_keys()[0]]),
-		    "'" + a[that.val_keys()[1]] + "'",
-		    isNaN(a[that.val_keys()[0]]));
+	// console.log(a["state"],
+	// 	    "'" + a[that.val_keys()[0]] + "'",
+	// 	    isNaN(a[that.val_keys()[0]]),
+	// 	    "'" + a[that.val_keys()[1]] + "'",
+	// 	    isNaN(a[that.val_keys()[0]]));
 	if (a[that.val_keys()[0]].length < 1) return false;
 	if (a[that.val_keys()[1]].length < 1) return false;
 	return true;
     }));
 
-				 
-    
     this.container().html("");
     
     this.__svg = this.container()
 	.append("svg")
 	.attr("width",
-	      this.container().node().getBoundingClientRect().width );
+	      this.container().node().getBoundingClientRect().width )
+
+    this.__g = this.__svg.append("g");
 
     var lkey = this.label_key();
-    console.log("lkey", lkey);
+    // console.log("lkey", lkey);
     
-    this.__gaps_g = this.__svg.append("g")
+    this.__gaps_g = this.__g.append("g")
 	.classed("gaps", true)
 	.style("transform",
 	       "translate(0px," + this.__margin.top + "px)")
@@ -197,11 +205,7 @@ gapchart.prototype.draw_rank = function (){
 	      function(d){
 		  return d[lkey];
 	      });
-
-
     this.draw_rank_dots();
-
-
 
     this.position_rank_dots(function(d){
 	var ret = that.rank_scale()(that.gap(d));
@@ -209,13 +213,26 @@ gapchart.prototype.draw_rank = function (){
 	return ret;
     });
 
+    // redraw with more margin if its overlapping 
+     
+    var overhang =
+	Math.round(this.__g.node().getBBox().width
+		   + this.__g.node().getBBox().x
+		   - this.__svg.node().getBoundingClientRect().width);
+
+    if (overhang > 0){
+	// console.log("too wide- redrawing...");
+	this.__margin.right += overhang/2;
+	this.__margin.left += overhang/2;
+	return this.draw_rank();
+    }
     
-    this.__axis = this.__svg.append("g")
+    this.__axis = this.__g.append("g")
 	.classed("d3axis", true)
 	.append("g")
 	.call(this.rank_axis());
-
-    console.log(this.__gaps_g.node().getBBox());
+    
+    // console.log(this.__gaps_g.node().getBBox());
 
     this.__axis.style("transform",
 		      "translate(0px,"
@@ -223,5 +240,33 @@ gapchart.prototype.draw_rank = function (){
 			  + this.__gaps_g.node().getBBox().y
 			  + this.radius())
 		      + "px)");
+
+
+    this.__svg.attr("height", function(){
+	return ( that.__g.node().getBBox().height
+	    + that.__g.node().getBBox().y) + "px";
+    });
+    
+    this.__detail_label = this.container().append("div")
+	.classed("detail-label", true)
+	.html("&nbsp;");
+
+    this.__rank_dots.on("mouseover", function(d){
+	// console.log(d);
+	that.__detail_label.text(
+	    
+	    that.val_keys()[0] + ": "
+		+ Math.round(d[that.val_keys()[0]])
+		+ " "
+		+ that.val_keys()[1] + ": " 
+		+ Math.round(d[that.val_keys()[1]]))
+	    
+    });
+
+    this.__rank_dots.on("mouseout", function(){
+    	that.__detail_label.html("&nbsp;");
+    });
+
+    
 }
 
