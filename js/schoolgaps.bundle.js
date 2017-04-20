@@ -5929,11 +5929,6 @@ gapchart.prototype.draw_rank = function (){
     // filter data
     var that = this;
     this.data(this.data().filter(function(a){
-	// console.log(a["state"],
-	// 	    "'" + a[that.val_keys()[0]] + "'",
-	// 	    isNaN(a[that.val_keys()[0]]),
-	// 	    "'" + a[that.val_keys()[1]] + "'",
-	// 	    isNaN(a[that.val_keys()[0]]));
 	if (a[that.val_keys()[0]].length < 1) return false;
 	if (a[that.val_keys()[1]].length < 1) return false;
 	return true;
@@ -6107,12 +6102,6 @@ var go = function(d, keys){
 	.label_key("state")
 	.radius(8)
 	.data(d)
-
-    // console.log( gaps );
-    // console.log(gaps.data_arr("ell"));
-    // console.log( gaps.min_max("ell"), gaps.min_max("non-ell") );
-    // console.log( gaps.val_range() );
-    // console.log( gaps.gap_range() );
 
     gaps.draw_rank();
 
