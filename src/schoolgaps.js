@@ -74,12 +74,6 @@ var go = function(d, keys){
 	.radius(8)
 	.data(d)
 
-    // console.log( gaps );
-    // console.log(gaps.data_arr("ell"));
-    // console.log( gaps.min_max("ell"), gaps.min_max("non-ell") );
-    // console.log( gaps.val_range() );
-    // console.log( gaps.gap_range() );
-
     gaps.draw_rank();
 
     d3.select(window).on("resize", function(){

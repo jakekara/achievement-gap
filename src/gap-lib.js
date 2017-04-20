@@ -169,11 +169,6 @@ gapchart.prototype.draw_rank = function (){
     // filter data
     var that = this;
     this.data(this.data().filter(function(a){
-	// console.log(a["state"],
-	// 	    "'" + a[that.val_keys()[0]] + "'",
-	// 	    isNaN(a[that.val_keys()[0]]),
-	// 	    "'" + a[that.val_keys()[1]] + "'",
-	// 	    isNaN(a[that.val_keys()[0]]));
 	if (a[that.val_keys()[0]].length < 1) return false;
 	if (a[that.val_keys()[1]].length < 1) return false;
 	return true;
