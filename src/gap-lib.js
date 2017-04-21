@@ -216,7 +216,7 @@ gapchart.prototype.draw_rank = function (){
 
     this.container().html("");
 
-    this.container().append("h3")
+    this.container().append("h2")
 	.html(this.title());
 
     this.__explainer = this.container().append("div")

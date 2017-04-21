@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato:400,900');
+@import url('https://fonts.googleapis.com/css?family=Lato:400');
 
 body{
     margin: 0px;
@@ -21,6 +21,7 @@ div.infographic{
 
 h1,h2,h3,h4,h5,h6,h7{
     text-transform: uppercase;
+    font-weight: 400;
 }
 
 .explainer, .byline, .sourceline{
