@@ -6710,9 +6710,9 @@ gapchart.prototype.draw_rank = function (){
 
     if (overhang > 0){
 	// console.log("too wide- redrawing...");
-	this.__margin.right += overhang/2;
-	this.__margin.left += overhang/2;
-	return this.draw_rank();
+	// this.__margin.right += overhang/2;
+	// this.__margin.left += overhang/2;
+	// return this.draw_rank();
     }
     
     this.__axis = this.__g.append("g")
