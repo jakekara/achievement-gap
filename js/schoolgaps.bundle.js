@@ -6671,7 +6671,6 @@ gapchart.prototype.draw_rank = function (){
 	      // 	      this.container().node().getBoundingClientRect().width)+ "px");
 	      // // d3.select(window).node().getBoundingClientRect().width );
 		  var ret = that.container().node().getBoundingClientRect().width ;
-		  d3.select("#error").text(ret);
 		  return ret + "px";
 	      })
 
@@ -6864,11 +6863,26 @@ var go = function(d, keys){
 
     // console.log("got data", d);
 
-    var d = d.sort(function(a, b){
-	if (a["state"].toUpperCase() == "CONNECTICUT"
-	    || a["state"].toUpperCase() == "NATIONAL") return 1;
-	return -1;
-    });
+    var d = d
+	.sort(function(a, b){
+	    if (a["state"].toUpperCase() == "CONNECTICUT"
+		|| a["state"].toUpperCase() == "NATIONAL") return 1;
+	    return -1;
+	})
+	.map(function(a){
+	    ret = a;
+	    if (ret["state"] == "District of Columbia")
+		ret["state"] = "D.C.";
+	    return ret;
+	})
+	.filter(function(a){
+	    
+	    if (
+		a["state"] == "DoDEA"
+		 )
+		return false;
+	    return true;
+	});
 
     var fmt_group = function(g){
 	return g

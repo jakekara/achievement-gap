@@ -230,7 +230,6 @@ gapchart.prototype.draw_rank = function (){
 	      // 	      this.container().node().getBoundingClientRect().width)+ "px");
 	      // // d3.select(window).node().getBoundingClientRect().width );
 		  var ret = that.container().node().getBoundingClientRect().width ;
-		  d3.select("#error").text(ret);
 		  return ret + "px";
 	      })
 

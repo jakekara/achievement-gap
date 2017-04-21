@@ -74,11 +74,26 @@ var go = function(d, keys){
 
     // console.log("got data", d);
 
-    var d = d.sort(function(a, b){
-	if (a["state"].toUpperCase() == "CONNECTICUT"
-	    || a["state"].toUpperCase() == "NATIONAL") return 1;
-	return -1;
-    });
+    var d = d
+	.sort(function(a, b){
+	    if (a["state"].toUpperCase() == "CONNECTICUT"
+		|| a["state"].toUpperCase() == "NATIONAL") return 1;
+	    return -1;
+	})
+	.map(function(a){
+	    ret = a;
+	    if (ret["state"] == "District of Columbia")
+		ret["state"] = "D.C.";
+	    return ret;
+	})
+	.filter(function(a){
+	    
+	    if (
+		a["state"] == "DoDEA"
+		 )
+		return false;
+	    return true;
+	});
 
     var fmt_group = function(g){
 	return g
