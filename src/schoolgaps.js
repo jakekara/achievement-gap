@@ -1,6 +1,8 @@
-var d3 = Object.assign({},
+const d3 = Object.assign({},
 		       require("d3-selection"),
 		       require("d3-request"));
+
+const numeral = require("numeraljs");
 
 var gaplib = require( "./gap-lib.js" );
 
@@ -16,13 +18,25 @@ var selected_keys = null;
 var cached_files = {};
 var throttle = null;
 
+var get_group = function(){
+    return selected(d3.select("#group_picker")).attr("data-fname");
+}
+
+var get_subj = function(){
+    return selected(d3.select("#subj_picker")).attr("data-fname");
+}
+
+var get_grade = function(){
+    return selected(d3.select("#grade_picker")).attr("data-fname");
+}
+
 var get_fname = function(){
     var ret = "data/"
-    ret += selected(d3.select("#group_picker")).attr("data-fname");
+    ret += get_group()
     ret += "_";
-    ret += selected(d3.select("#subj_picker")).attr("data-fname");
+    ret += get_subj()
     ret += "_";
-    ret += selected(d3.select("#grade_picker")).attr("data-fname");
+    ret += get_grade()
     ret += ".csv";
     return ret;
 };
@@ -53,7 +67,7 @@ var update = function(){
 	});
     }
 
-	
+    
 }
 
 var go = function(d, keys){
@@ -65,14 +79,51 @@ var go = function(d, keys){
 	    || a["state"].toUpperCase() == "NATIONAL") return 1;
 	return -1;
     });
+
+    var fmt_group = function(g){
+	return g
+	    .replace("not ell","non-ell")
+	    .replace("ell","ELL")
+	    .replace("hispanic","Hispanic");
+    }
+
     
     gaps = new gaplib.gapchart()
 	.container(d3.select("#container"))
     // .val_keys(["ell","not ell"])
 	.val_keys( keys )
 	.label_key("state")
-	.radius(8)
+	.default_val("Connecticut")
+	// .radius(12)
 	.data(d)
+	.unit("% proficient")
+	.gap_unit(" points")
+	.title(fmt_group(keys[0] + ", " + keys[1] + " achievement gap "))
+	.radius_function(function(d){
+	    return 10;
+	})
+	.explainer_function(function(d){
+
+	    var place = "In " + d[gaps.label_key()] + ", ";
+	    if (d[gaps.label_key()] == "National")
+		place = "Nationwide, " ;
+
+	    
+	    return place
+	    	+ Math.round(d[gaps.val_keys()[0]]) + " percent of "
+		+ fmt_group(gaps.val_keys()[0])
+		+ " students "
+		+ " and "
+	    	+ Math.round(d[gaps.val_keys()[1]])
+		+ " percent of " 
+		+ fmt_group(gaps.val_keys()[1])
+		+ " students"
+		+ " were at or above proficiency in"
+		+ " " + numeral(get_grade()).format('0o')
+		+ "-grade " + get_subj() + "."
+		+ " That's a " + Math.round(gaps.gap(d)) + "-point gap.";
+
+	});
 
     gaps.draw_rank();
 
@@ -107,7 +158,7 @@ var make_gui = function(){
 	"fname":"reading",
     },{
 	"label":"Math",
-	"fname":"reading",
+	"fname":"math",
     },{
 	"label":"Science",
 	"fname":"science"
@@ -137,7 +188,6 @@ var make_gui = function(){
 	.attr("data-key1",function(d){  return d["key1"]; })
 	.attr("data-key2",function(d){  return d["key2"]; })
 	.text(function(d){ return d["label"];});
-
 
     var grade_opts = grade_sel.selectAll("option")
 	.data(grade)

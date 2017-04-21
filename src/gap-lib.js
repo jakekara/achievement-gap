@@ -1,3 +1,7 @@
+/*
+ * gap-lib.js - library for making gap rank graphics
+ */
+
 var d3 = Object.assign({},
 		       require("d3-selection"),
 		       require("d3-array"),
@@ -21,9 +25,23 @@ var gapchart = function()
     return this;
 };
 
-exports.gapchart = gapchart
+exports.gapchart = gapchart;
 
-gapchart.prototype.radius = accessor( "__dot_radius" );
+gapchart.prototype.explainer_height = accessor ("__explainer_height");
+
+gapchart.prototype.title = accessor("__title");
+
+gapchart.prototype.default_val = accessor("__default_val");
+
+gapchart.prototype.explainer_function = accessor("__explainer_function");
+
+gapchart.prototype.unit = accessor( "__unit" );
+
+gapchart.prototype.gap_unit = accessor( "__gap_unit" );
+
+// gapchart.prototype.radius = accessor( "__dot_radius" );
+
+gapchart.prototype.radius_function = accessor( "__dot_radius_function" );
 
 gapchart.prototype.buffer_pct = accessor( "__buffer_pct" );
 
@@ -34,6 +52,10 @@ gapchart.prototype.val_keys = accessor( "__val_key" );
 gapchart.prototype.label_key = accessor( "__label_key" );
 
 gapchart.prototype.data = accessor( "__data" );
+
+gapchart.prototype.radius = function(d){
+    return this.radius_function()(d);
+}
 
 gapchart.prototype.data_arr = function ( key )
 {
@@ -139,6 +161,8 @@ gapchart.prototype.position_rank_dots = function(f)
 gapchart.prototype.draw_rank_dots = function()
 {
     var lkey = this.label_key();
+    var k1 = this.val_keys()[0];
+    var k2 = this.val_keys()[1];
 
     var xmin = this.__margin.left;
     var xmax = this.container().node().getBoundingClientRect().width
@@ -146,20 +170,36 @@ gapchart.prototype.draw_rank_dots = function()
     
     var label = this.__rank_dots
 	.append("text")
-	.text(function(d){ return d[lkey]; });
+    	.classed("dot-label top-label", true)
+	.text(function(d){ return d[lkey]; })
+	.attr("y", function(){ return this.getBBox().height;});
 
-    label.attr("y", function(){ return this.getBBox().height;})
-	.attr("x", function(){
+    var that = this;
+    var label_bottom = this.__rank_dots
+	.append("text")
+	.classed("dot-label bottom-label", true)
+	.text(function(d){
+	    return "gap: " 
+		+ Math.round(that.gap(d))
+		+ " " + that.gap_unit();
+	})
+    	.attr("y", function(){
+	    return this.getBBox().height
+		+ this.parentNode.getBBox().height + that.radius();
+	});
 
+    // label.attr("y", function(){ return this.getBBox().height;});
+
+    d3.selectAll(".dot-label").attr("x", function(){
 	    var ret = 0 - this.getBBox().width / 2 ;
-
 	    return ret;
-	    
 	});
 
     this.__rank_dots
 	.append("circle")
-	.attr("r", this.radius())
+	.attr("r", function(d){
+	    return that.radius();
+	})
 	// .attr("cx", 50)
 	.attr("cy", this.radius()  + label.node().getBBox().height * 1.4)
 }
@@ -175,6 +215,12 @@ gapchart.prototype.draw_rank = function (){
     }));
 
     this.container().html("");
+
+    this.container().append("h3")
+	.html(this.title());
+
+    this.__explainer = this.container().append("div")
+	.classed("explainer", true);
     
     this.__svg = this.container()
 	.append("svg")
@@ -247,21 +293,45 @@ gapchart.prototype.draw_rank = function (){
 	.html("&nbsp;");
 
     this.__rank_dots.on("mouseover", function(d){
-	// console.log(d);
-	that.__detail_label.text(
-	    
-	    that.val_keys()[0] + ": "
-		+ Math.round(d[that.val_keys()[0]])
-		+ " "
-		+ that.val_keys()[1] + ": " 
-		+ Math.round(d[that.val_keys()[1]]))
+
+	var tmp_height = that.__explainer.node()
+	    .getBoundingClientRect().height;
+	
+	that.__explainer.html(that.explainer_function()(d));
+
+	var new_height = that.__explainer.node()
+	    .getBoundingClientRect().height;
+
+	// prevent explainer from  contracting
+	if ( new_height < tmp_height )
+	    that.__explainer.style("height",
+				     tmp_height + "px");
+	
 	    
     });
 
-    this.__rank_dots.on("mouseout", function(){
+    var restore = function(){
+
+	var d = that.data().filter(function(a){
+	    return a[that.label_key()] == that.default_val();
+	})[0];
+
+	that.__explainer.html(that.explainer_function()(d));
     	that.__detail_label.html("&nbsp;");
-    });
+	};
 
+    this.__rank_dots.on("mouseout", restore );
+    // function(){
+
+    // 	var d = that.data().filter(function(a){
+    // 	    return a[that.label_key()] == that.default_val();
+    // 	})[0];
+
+    // 	that.__explainer.html(that.explainer_function()(d));
+    // 	that.__detail_label.html("&nbsp;");
+    // });
+
+    restore();
     
 }
 

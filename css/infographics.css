@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:400,900');
+
+body{
+    margin: 0px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    color: #333;
+}
+
+
+
+div {
+    box-sizing: border-box;
+
+}
+
+div.infographic{
+    border-top: 1px solid #ebebeb;
+    border-bottom: 1px solid #ebebeb;
+}
+
+h1,h2,h3,h4,h5,h6,h7{
+    text-transform: uppercase;
+}
+
+.explainer, .byline, .sourceline{
+    color: gray;
+}
+
+.byline, .sourceline{
+    font-size: 12px;
+}
+
+.byline {
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.clear-both{
+    clear: both;
+}
+
