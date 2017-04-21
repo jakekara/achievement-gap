@@ -225,9 +225,10 @@ gapchart.prototype.draw_rank = function (){
     this.__svg = this.container()
 	.append("svg")
 	.attr("width",
-	      window.innerWidth);
-	      // d3.select(window).node().getBoundingClientRect().width );
-	      // this.container().node().getBoundingClientRect().width )
+	      // Math.max(window.innerWidth,
+	      // 	      this.container().node().getBoundingClientRect().width)+ "px");
+	      // // d3.select(window).node().getBoundingClientRect().width );
+	      this.container().node().getBoundingClientRect().width )
 
     this.__g = this.__svg.append("g");
 
@@ -277,22 +278,17 @@ gapchart.prototype.draw_rank = function (){
     
     // console.log(this.__gaps_g.node().getBBox());
 
-    this.__axis.style("transform",
-		      "translate(0px,"
+    var trans = "translate(0px, "
 		      + ( this.__gaps_g.node().getBBox().height
 			  + this.__gaps_g.node().getBBox().y
 			  + this.radius())
-		      + "px)");
+	+ "px)";
 
-
-    this.__svg.attr("height", function(){
-	return ( that.__g.node().getBBox().height
-	    + that.__g.node().getBBox().y) + "px";
-    });
-    
-    this.__detail_label = this.container().append("div")
-	.classed("detail-label", true)
-	.html("&nbsp;");
+    this.__axis.style("transform", trans);
+    // this.__axis.attr("y",
+    // 		     (this.__gaps_g.node().getBBox().height
+    // 		     + this.__gaps_g.node().getBBox().y
+    // 		     + this.radius()) + "px")
 
     this.__rank_dots.on("mouseover", function(d){
 
@@ -309,9 +305,9 @@ gapchart.prototype.draw_rank = function (){
 	    that.__explainer.style("height",
 				     tmp_height + "px");
 	
-	    
     });
 
+    // restore the default explainer 
     var restore = function(){
 
 	var d = that.data().filter(function(a){
@@ -319,21 +315,29 @@ gapchart.prototype.draw_rank = function (){
 	})[0];
 
 	that.__explainer.html(that.explainer_function()(d));
-    	that.__detail_label.html("&nbsp;");
+
 	};
 
     this.__rank_dots.on("mouseout", restore );
-    // function(){
-
-    // 	var d = that.data().filter(function(a){
-    // 	    return a[that.label_key()] == that.default_val();
-    // 	})[0];
-
-    // 	that.__explainer.html(that.explainer_function()(d));
-    // 	that.__detail_label.html("&nbsp;");
-    // });
 
     restore();
+
+    this.__svg.attr("height", function(){
+	// var svg_height = that.__g.node().getBBox().height
+	// that.__g.node().getBBox().y;
+	// // // + that.radius() * 2;
+	// //     + that.__axis.node().getBBox().height * 2
+	// //     + that.__axis.node().getBBox().y;
+
+	var svg_height = that.__g.node().getBBox().height
+	    + that.__g.node().getBBox().y;
+	
+	    // that.__g.node().innerHeight
+	// + that.__g.node().getBBox().y
+
+	svg_height = Math.max(87, svg_height);
+	return svg_height + "px";
+    });
     
 }
 
