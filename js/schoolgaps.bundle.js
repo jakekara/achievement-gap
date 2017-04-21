@@ -6666,10 +6666,13 @@ gapchart.prototype.draw_rank = function (){
     this.__svg = this.container()
 	.append("svg")
 	.attr("width",
+	      function(){
 	      // Math.max(window.innerWidth,
 	      // 	      this.container().node().getBoundingClientRect().width)+ "px");
 	      // // d3.select(window).node().getBoundingClientRect().width );
-	      this.container().node().getBoundingClientRect().width )
+		  // var ret = that.container().node().getBoundingClientRect().width ;
+		  return ret + "px";
+	      })
 
     this.__g = this.__svg.append("g");
 
