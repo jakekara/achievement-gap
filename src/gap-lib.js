@@ -225,7 +225,8 @@ gapchart.prototype.draw_rank = function (){
     this.__svg = this.container()
 	.append("svg")
 	.attr("width",
-	      d3.select(window).node().getBoundingClientRect().width );
+	      window.innerWidth);
+	      // d3.select(window).node().getBoundingClientRect().width );
 	      // this.container().node().getBoundingClientRect().width )
 
     this.__g = this.__svg.append("g");
